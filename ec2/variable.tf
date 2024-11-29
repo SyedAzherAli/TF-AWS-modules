@@ -22,3 +22,6 @@ variable "user_data" {
   description = "Enter the file path of script to run"
   default = "default.sh"
 }
+variable "volume_size" {
+  default = 8
+}
