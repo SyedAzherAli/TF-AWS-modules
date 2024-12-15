@@ -94,7 +94,7 @@ resource "aws_iam_role_policy_attachment" "CSI_driver_policy" {
 
 # Creating eks cluster 
 resource "aws_eks_cluster" "my_first_cluster" { 
-  name     = "my_first_cluster"
+  name     = "my-first-cluster"
   role_arn = aws_iam_role.eks_cluster_role.arn
 
   vpc_config {
