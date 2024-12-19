@@ -42,17 +42,18 @@ resource "aws_subnet" "custom_subnet03" {
   availability_zone = "ap-south-1a"
 
   tags = { 
-      kubernetes.io/cluster/dev-eks-cluster = owned
+      kubernetes.io/cluster/dev-eks-cluster = shared
       kubernetes.io/role/internal-elb = 1 
   }
 }
+//creating subnet 4 
 resource "aws_subnet" "custom_subnet04"{
   vpc_id = aws_vpc.custom_vpc.id
   cidr_block = var.cidr_block_sub04
   availability_zone = "ap-south-1b"
 
   tags = { 
-      kubernetes.io/cluster/dev-eks-cluster = owned
+      kubernetes.io/cluster/dev-eks-cluster = shared
       kubernetes.io/role/internal-elb = 1 
   }
 }
