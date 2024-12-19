@@ -19,8 +19,8 @@ resource "aws_subnet" "custom_subnet01" {
     map_public_ip_on_launch = true
 
     tags = { 
-      kubernetes.io/cluster/dev-eks-cluster = shared 
-      kubernetes.io/role/elb = 1 
+      kubernetes.io/cluster/dev-eks-cluster = "shared"
+      kubernetes.io/role/elb = "1"
     }
 }
 //creatin subnet 2
@@ -31,8 +31,8 @@ resource "aws_subnet" "custom_subnet02" {
     map_public_ip_on_launch = true
 
     tags = {
-      kubernetes.io/cluster/dev-eks-cluster = shared 
-      kubernetes.io/role/elb = 1 
+      kubernetes.io/cluster/dev-eks-cluster = "shared"
+      kubernetes.io/role/elb = "1" 
     }
 }
 //creating subnet 3 
@@ -42,8 +42,8 @@ resource "aws_subnet" "custom_subnet03" {
   availability_zone = "ap-south-1a"
 
   tags = { 
-      kubernetes.io/cluster/dev-eks-cluster = shared
-      kubernetes.io/role/internal-elb = 1 
+      kubernetes.io/cluster/dev-eks-cluster = "shared"
+      kubernetes.io/role/internal-elb = "1" 
   }
 }
 //creating subnet 4 
@@ -53,8 +53,8 @@ resource "aws_subnet" "custom_subnet04"{
   availability_zone = "ap-south-1b"
 
   tags = { 
-      kubernetes.io/cluster/dev-eks-cluster = shared
-      kubernetes.io/role/internal-elb = 1 
+      kubernetes.io/cluster/dev-eks-cluster = "shared"
+      kubernetes.io/role/internal-elb = "1" 
   }
 }
 
