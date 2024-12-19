@@ -187,7 +187,7 @@ resource "aws_eks_node_group" "eks_nodegroup" {
 }
 
 # Creating Node-group SPOT 
-resource "aws_eks_node_group" "eks_nodegroup" { 
+resource "aws_eks_node_group" "eks_nodegroup_spot" { 
   cluster_name    = aws_eks_cluster.my_first_cluster.name
   node_group_name = "${var.cluster_name}-spot-nodes"
   node_role_arn   = aws_iam_role.eks_node_role.arn
