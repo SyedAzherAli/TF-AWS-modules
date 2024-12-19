@@ -11,34 +11,52 @@ resource "aws_vpc" "custom_vpc"{
       "name" = "customVPC"
     }
 }
-
 //creating subnet 1 
 resource "aws_subnet" "custom_subnet01" {
     vpc_id = aws_vpc.custom_vpc.id
     cidr_block = var.cidr_block_sub01
     availability_zone = "ap-south-1a"
     map_public_ip_on_launch = true
-}
 
+    tags = { 
+      kubernetes.io/cluster/dev-eks-cluster = shared 
+      kubernetes.io/role/elb = 1 
+    }
+}
 //creatin subnet 2
 resource "aws_subnet" "custom_subnet02" { 
     vpc_id = aws_vpc.custom_vpc.id
     cidr_block = var.cidr_block_sub02
     availability_zone = "ap-south-1b"
     map_public_ip_on_launch = true
-}
 
+    tags = {
+      kubernetes.io/cluster/dev-eks-cluster = shared 
+      kubernetes.io/role/elb = 1 
+    }
+}
 //creating subnet 3 
 resource "aws_subnet" "custom_subnet03" {
   vpc_id = aws_vpc.custom_vpc.id
   cidr_block = var.cidr_block_sub03
   availability_zone = "ap-south-1a"
+
+  tags = { 
+      kubernetes.io/cluster/dev-eks-cluster = owned
+      kubernetes.io/role/internal-elb = 1 
+  }
 }
 resource "aws_subnet" "custom_subnet04"{
   vpc_id = aws_vpc.custom_vpc.id
   cidr_block = var.cidr_block_sub04
   availability_zone = "ap-south-1b"
+
+  tags = { 
+      kubernetes.io/cluster/dev-eks-cluster = owned
+      kubernetes.io/role/internal-elb = 1 
+  }
 }
+
 //creating internet gateway 
 resource "aws_internet_gateway" "custom_IGW" {
   vpc_id = aws_vpc.custom_vpc.id

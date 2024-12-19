@@ -94,7 +94,7 @@ resource "aws_iam_role_policy_attachment" "CSI_driver_policy" {
 
 # Creating eks cluster 
 resource "aws_eks_cluster" "my_first_cluster" { 
-  name     = "my-first-cluster"
+  name     = var.cluster_name
   role_arn = aws_iam_role.eks_cluster_role.arn
 
   vpc_config {
@@ -125,42 +125,47 @@ resource "aws_eks_cluster" "my_first_cluster" {
 resource "aws_eks_addon" "addon_vpc_cni" {
   cluster_name = aws_eks_cluster.my_first_cluster.name
   addon_name   = "vpc-cni"
-  addon_version               = "v1.18.3-eksbuild.2"
+  addon_version               = "v1.19.0-eksbuild.1"
   resolve_conflicts_on_update = "PRESERVE"
 }
 resource "aws_eks_addon" "addon_kubeproxy" {
 cluster_name = aws_eks_cluster.my_first_cluster.name
   addon_name   = "kube-proxy"
-  addon_version               = "v1.31.0-eksbuild.2"
+  addon_version               = "v1.31.3-eksbuild.2"
   resolve_conflicts_on_update = "PRESERVE" 
 }
 resource "aws_eks_addon" "addon_eksPodIdentityAgent" {
 cluster_name = aws_eks_cluster.my_first_cluster.name
   addon_name   = "eks-pod-identity-agent"
-  addon_version               = "v1.3.2-eksbuild.2"
+  addon_version               = "v1.3.4-eksbuild.1"
+  resolve_conflicts_on_update = "PRESERVE" 
+}
+resource "aws_eks_addon" "addon_aws-ebs-csi-driver" {
+cluster_name = aws_eks_cluster.my_first_cluster.name
+  addon_name   = "aws-ebs-csi-driver"
+  addon_version               = "v1.37.0-eksbuild.1"
   resolve_conflicts_on_update = "PRESERVE" 
 }
  
-# Creating nodegroup 
+# Creating nodegroup ON_DEMAND
 resource "aws_eks_node_group" "eks_nodegroup" { 
   cluster_name    = aws_eks_cluster.my_first_cluster.name
-  node_group_name = "my_nodegroup_eks"
+  node_group_name = "${var.cluster_name}-on-demand-nodes"
   node_role_arn   = aws_iam_role.eks_node_role.arn
   subnet_ids      = var.worker_subnet_ids
   ami_type = "AL2_x86_64"
-  instance_types = var.instance_types
-  disk_size = var.disk_size
-  
+  instance_types = var.instance_types_on_demand
+  disk_size = var.disk_size_on_demand
 
   remote_access {
     ec2_ssh_key = var.key_name
     source_security_group_ids = [ aws_security_group.EKS_SG.id ]
   }
-
+  capacity_type = "ON_DEMAND"
   scaling_config {
-    desired_size = var.scaling_config.desired_size
-    max_size     = var.scaling_config.max_size
-    min_size     = var.scaling_config.min_size
+    desired_size = var.on_demand_scaling.desired_size
+    max_size     = var.on_demand_scaling.max_size
+    min_size     = var.on_demand_scaling.min_size
   }
 
   update_config {
@@ -175,4 +180,48 @@ resource "aws_eks_node_group" "eks_nodegroup" {
     aws_iam_role_policy_attachment.ecr_read_only,
     aws_iam_role_policy_attachment.CSI_driver_policy,
   ]
+
+   tags = {
+    "Name" = "${var.cluster_name}-on-demand-nodes"
+  }
 }
+
+# Creating Node-group SPOT 
+resource "aws_eks_node_group" "eks_nodegroup" { 
+  cluster_name    = aws_eks_cluster.my_first_cluster.name
+  node_group_name = "${var.cluster_name}-spot-nodes"
+  node_role_arn   = aws_iam_role.eks_node_role.arn
+  subnet_ids      = var.worker_subnet_ids
+  ami_type = "AL2_x86_64"
+  instance_types = var.instance_types_spot
+  disk_size = var.disk_size_spot
+
+  remote_access {
+    ec2_ssh_key = var.key_name
+    source_security_group_ids = [ aws_security_group.EKS_SG.id ]
+  }
+  capacity_type = "SPOT"
+  scaling_config {
+    desired_size = var.spot_scaling.desired_size
+    max_size     = var.spot_scaling.max_size
+    min_size     = var.spot_scaling.min_size
+  }
+
+  update_config {
+    max_unavailable = 1
+  }
+
+  # Ensure that IAM Role permissions are created before and deleted after EKS Node Group handling.
+  # Otherwise, EKS will not be able to properly delete EC2 Instances and Elastic Network Interfaces.
+  depends_on = [
+    aws_iam_role_policy_attachment.eks_worker_node_policy,
+    aws_iam_role_policy_attachment.eks_cni_policy,
+    aws_iam_role_policy_attachment.ecr_read_only,
+    aws_iam_role_policy_attachment.CSI_driver_policy,
+  ]
+   tags = {
+    "Name" = "${var.cluster_name}-spot-nodes"
+  }
+}
+
+
